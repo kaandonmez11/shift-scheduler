@@ -16,13 +16,13 @@ Proje, hızı ve modern yapısı nedeniyle **Vite (React)** kullanılarak geliş
 ```
 
 ## Fazlar ve Sprintler
-- [ ] **Faz 1: Temel Kurulum ve UI**
-  - [ ] Sprint 1.1: Proje İskeleti ve Kütüphane Kurulumları
-  - [ ] Sprint 1.2: Hibrit Liquid Glass Teması
-  - [ ] Sprint 1.3: Temel Arayüz Bileşenleri
-- [ ] **Faz 2: Durum Yönetimi (State)**
-  - [ ] Sprint 2.1: Browser Kayıt Sistemi (Zustand Persist)
-  - [ ] Sprint 2.2: Sekme Yapısı ve JSON Export/Import
+- [x] **Faz 1: Temel Kurulum ve UI**
+  - [x] Sprint 1.1: Proje İskeleti ve Kütüphane Kurulumları
+  - [x] Sprint 1.2: Hibrit Liquid Glass Teması
+  - [x] Sprint 1.3: Temel Arayüz Bileşenleri
+- [x] **Faz 2: Durum Yönetimi (State)**
+  - [x] Sprint 2.1: Browser Kayıt Sistemi (Zustand Persist)
+  - [x] Sprint 2.2: Sekme Yapısı ve JSON Export/Import
 - [ ] **Faz 3: Veriler ve Algoritma**
   - [ ] Sprint 3.1: Personel Listesi ve İzinlerin Eklenmesi
   - [ ] Sprint 3.2: Otomatik Vardiya Algoritması (Kural Motoru)

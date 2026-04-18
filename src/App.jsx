@@ -2,9 +2,23 @@ import React from 'react';
 import Card from './components/Card';
 import Button from './components/Button';
 import Input from './components/Input';
-import { MousePointerClick, CalendarDays } from 'lucide-react';
+import { Database, Settings2, Trash2 } from 'lucide-react';
+import { useStore } from './store/useStore';
+import WorkspaceTabs from './features/Workspace/WorkspaceTabs';
 
 function App() {
+  const { 
+    workspaces, 
+    activeWorkspaceId, 
+    addWorkspace, 
+    setActiveWorkspace, 
+    deleteWorkspace, 
+    updateActiveWorkspaceSettings 
+  } = useStore();
+
+  // Aktif olan nesneyi state dizisinin içinden bul
+  const activeWorkspace = workspaces.find(ws => ws.id === activeWorkspaceId);
+
   return (
     <div style={{ 
       minHeight: '100vh', 
@@ -13,65 +27,83 @@ function App() {
       justifyContent: 'center',
       padding: '2rem'
     }}>
-      
-      {/* Test Kurgusu - Ortalanmış Grid */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+        display: 'flex',
+        flexDirection: 'column',
         gap: '2rem',
-        maxWidth: '1200px',
+        maxWidth: '800px',
         width: '100%'
       }}>
+      
+        <h1 style={{ 
+          textAlign: 'center', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          gap: '1rem', 
+          color: 'var(--text-primary)', 
+          fontWeight: '800', 
+          fontSize: '2rem' 
+        }}>
+          <Database size={36} color="var(--accent-primary)" /> Zustand & LocalStorage
+        </h1>
 
-        {/* 1. Component Test Kartı: Butonlar */}
-        <Card style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center', textAlign: 'center' }}>
-          <div style={{ background: 'rgba(59, 130, 246, 0.15)', padding: '1rem', borderRadius: '50%', color: '#60a5fa' }}>
-            <MousePointerClick size={32} />
-          </div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: '600' }}>Button.jsx Testi</h2>
-          <p style={{ color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-            Üzerine geldiğinizde yayılan sıvı ışık efektini (fluid highlight) ve ince beyaz sınır belirginleşmesini test edin.
-          </p>
-          <div style={{ display: 'flex', gap: '1rem', marginTop: 'auto' }}>
-             <Button>Standard Buton</Button>
-             <Button style={{ background: 'var(--accent-primary)', color: 'white', borderColor: 'transparent' }}>
-               Renkli Buton
-             </Button>
-          </div>
-        </Card>
+      
+        {/* Workspace (Senaryo) Sekmeleri ve Actions */}
+        <WorkspaceTabs />
 
-        {/* 2. Component Test Kartı: Card & Hover */}
-        <Card style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center', textAlign: 'center' }}>
-           <div style={{ background: 'rgba(168, 85, 247, 0.15)', padding: '1rem', borderRadius: '50%', color: '#c084fc' }}>
-            <CalendarDays size={32} />
-          </div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: '600' }}>Card.jsx Testi</h2>
-          <p style={{ color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-            Şu an zaten bir "Card" bileşeninin içindesiniz! Mouse imlecini kartın üzerine getirdiğinizde nasıl hafifçe havalandığını ve gölgesinin (shadow) derinleştiğini görebilirsiniz.
-          </p>
-        </Card>
+        {/* Aktif Workspace Ayarları */}
+        {activeWorkspace && (
+          <Card key={activeWorkspace.id} className="animate-fade-in">
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              marginBottom: '1.5rem', 
+              borderBottom: '1px solid var(--glass-border)', 
+              paddingBottom: '1rem' 
+            }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#c084fc' }}>
+                <Settings2 size={24} /> {activeWorkspace.title} Ayarları
+              </h2>
+              <Button onClick={() => deleteWorkspace(activeWorkspace.id)} style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)', background: 'rgba(239, 68, 68, 0.1)' }}>
+                <Trash2 size={18} /> Senaryoyu Sil
+              </Button>
+            </div>
 
-        {/* 3. Component Test Kartı: Input */}
-        <Card style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: '600', textAlign: 'center' }}>Input.jsx Testi</h2>
-          <p style={{ color: 'var(--text-secondary)', lineHeight: '1.5', textAlign: 'center' }}>
-            Focus (tıklama) anındaki glow (parlama) efekti ve soft arkaplanını inceleyin.
-          </p>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: 'auto' }}>
-            <Input 
-              id="ad" 
-              label="Personel Adı" 
-              placeholder="Örn: Ayşe Yılmaz" 
-            />
-            <Input 
-              id="vardiya" 
-              label="Vardiya Hedefi" 
-              placeholder="Örn: 180 Saat" 
-              type="number"
-            />
-          </div>
-        </Card>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+              <Input 
+                id="dayShift" 
+                label="Gündüz Mesaisi Süresi (Saat)" 
+                type="number"
+                value={activeWorkspace.settings.dayShiftHours}
+                onChange={(e) => updateActiveWorkspaceSettings({ dayShiftHours: Number(e.target.value) })}
+              />
+              <Input 
+                id="nightShift" 
+                label="Gece Nöbeti Süresi (Saat)" 
+                type="number"
+                value={activeWorkspace.settings.nightShiftHours}
+                onChange={(e) => updateActiveWorkspaceSettings({ nightShiftHours: Number(e.target.value) })}
+              />
+              <div style={{ gridColumn: '1 / -1' }}>
+                <Input 
+                  id="targetHours" 
+                  label="Personel Aylık Hedef Mesai (Saat)" 
+                  type="number"
+                  value={activeWorkspace.settings.targetMonthlyHours}
+                  onChange={(e) => updateActiveWorkspaceSettings({ targetMonthlyHours: Number(e.target.value) })}
+                />
+              </div>
+            </div>
+            
+            <div style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(16, 185, 129, 0.1)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+              <p style={{ color: '#34d399', fontSize: '0.95rem', textAlign: 'center', margin: 0 }}>
+                💡 <strong>Kalıcılık Testi:</strong> Yukarıdaki verileri değiştirin, sekmeler arası geçiş yapın ve tarayıcıyı (F5) yenileyin. Zustand Persist sayesinde tüm verileriniz LocalStorage'dan kayıpsız bir şekilde yüklenecektir!
+              </p>
+            </div>
+          </Card>
+        )}
 
       </div>
     </div>

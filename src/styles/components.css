@@ -55,6 +55,12 @@
   outline: none;
 }
 
+.glass-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* Organik sıvı yayılma / parlama efekti hover */
 .glass-btn::before {
   content: '';
@@ -125,4 +131,41 @@
   background: rgba(0, 0, 0, 0.4);
   border-color: var(--accent-primary);
   box-shadow: inset 0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* Animations */
+@keyframes fadeInSlideUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  /* Daha yavaş ve akıcı bir timing curve eklendi (kullanıcı talebi) */
+  animation: fadeInSlideUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Buton İçi Text & Icon Değişim Animasyonu ve Ortalaması */
+@keyframes quickFade {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.animate-quick-fade {
+  animation: quickFade 0.3s ease-out forwards;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+/* Eski Tip Çirkin Browser Oklarını (Spin Buttons) Gizleme */
+input[type="number"].glass-input::-webkit-inner-spin-button,
+input[type="number"].glass-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"].glass-input {
+  -moz-appearance: textfield; /* Firefox desteği */
 }
