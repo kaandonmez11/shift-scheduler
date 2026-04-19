@@ -17,9 +17,13 @@ export const useStore = create(
           id: generateId(),
           title: title || `Yeni Senaryo ${state.workspaces.length + 1}`,
           settings: {
+            year: new Date().getFullYear(),
+            month: new Date().getMonth() + 1,
             dayShiftHours: 8,      // Gündüz mesaisi saati
             nightShiftHours: 12,   // Gece nöbeti saati
             targetMonthlyHours: 180, // Aylık hedeflenen toplam saat
+            dailyDayTarget: 3,     // Günlük hedeflenen minimum/optimum Gündüzcü sayısı
+            dailyNightTarget: 2,   // Günlük hedeflenen minimum/optimum Gececi sayısı
           },
           employees: [],
           shifts: []
@@ -64,6 +68,53 @@ export const useStore = create(
           return ws;
         });
 
+        return { workspaces: updatedWorkspaces };
+      }),
+
+      // --- ÇALIŞAN (PERSONEL) YÖNETİMİ EYLEMLERİ ---
+
+      // Personel Ekle (Aktif Workspace'e)
+      addEmployee: (workspaceId, employeeData) => set((state) => {
+        const updatedWorkspaces = state.workspaces.map(ws => {
+          if (ws.id === workspaceId) {
+            const newEmployee = {
+              id: generateId(),
+              name: employeeData.name,
+              seniority: employeeData.seniority || 'yeni', // 'yeni', 'deneyimli', 'kidemli'
+              requestedOffDays: [] // o personele ait tercih edilen tatil günleri (ör: [3, 14, 25])
+            };
+            return { ...ws, employees: [...ws.employees, newEmployee] };
+          }
+          return ws;
+        });
+        return { workspaces: updatedWorkspaces };
+      }),
+
+      // Personel Sil
+      removeEmployee: (workspaceId, employeeId) => set((state) => {
+        const updatedWorkspaces = state.workspaces.map(ws => {
+          if (ws.id === workspaceId) {
+            return {
+              ...ws,
+              employees: ws.employees.filter(emp => emp.id !== employeeId)
+            };
+          }
+          return ws;
+        });
+        return { workspaces: updatedWorkspaces };
+      }),
+
+      // Personel İzin (Off Days) Güncellemesi
+      updateEmployeeOffDays: (workspaceId, employeeId, offDaysArray) => set((state) => {
+        const updatedWorkspaces = state.workspaces.map(ws => {
+          if (ws.id === workspaceId) {
+            const updatedEmployees = ws.employees.map(emp => 
+              emp.id === employeeId ? { ...emp, requestedOffDays: offDaysArray } : emp
+            );
+            return { ...ws, employees: updatedEmployees };
+          }
+          return ws;
+        });
         return { workspaces: updatedWorkspaces };
       }),
 

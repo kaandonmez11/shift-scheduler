@@ -5,6 +5,7 @@ import Input from './components/Input';
 import { Database, Settings2, Trash2 } from 'lucide-react';
 import { useStore } from './store/useStore';
 import WorkspaceTabs from './features/Workspace/WorkspaceTabs';
+import PersonnelManager from './features/Personnel/PersonnelManager';
 
 function App() {
   const { 
@@ -86,6 +87,22 @@ function App() {
                 value={activeWorkspace.settings.nightShiftHours}
                 onChange={(e) => updateActiveWorkspaceSettings({ nightShiftHours: Number(e.target.value) })}
               />
+
+              <Input 
+                id="dailyDayTarget" 
+                label="Gündüzcü Kadrosu (Kişi/Günde)" 
+                type="number"
+                value={activeWorkspace.settings.dailyDayTarget}
+                onChange={(e) => updateActiveWorkspaceSettings({ dailyDayTarget: Number(e.target.value) })}
+              />
+              <Input 
+                id="dailyNightTarget" 
+                label="Gece Nöbetçi Kadrosu (Kişi/Günde)" 
+                type="number"
+                value={activeWorkspace.settings.dailyNightTarget}
+                onChange={(e) => updateActiveWorkspaceSettings({ dailyNightTarget: Number(e.target.value) })}
+              />
+
               <div style={{ gridColumn: '1 / -1' }}>
                 <Input 
                   id="targetHours" 
@@ -104,6 +121,9 @@ function App() {
             </div>
           </Card>
         )}
+
+        {/* Çoklu Personel ve İzin Paneli */}
+        {activeWorkspace && <PersonnelManager key={activeWorkspace.id + '_personnel'} />}
 
       </div>
     </div>
