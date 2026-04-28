@@ -26,9 +26,9 @@ Proje, hızı ve modern yapısı nedeniyle **Vite (React)** kullanılarak geliş
 - [x] **Faz 3: Veriler ve Algoritma**
   - [x] Sprint 3.1: Personel Listesi ve İzinlerin Eklenmesi
   - [x] Sprint 3.2: Otomatik Vardiya Algoritması (Kural Motoru)
-- [ ] **Faz 4: Takvim (Grid) Arayüzü**
-  - [ ] Sprint 4.1: Büyük Çizelgenin ve Saatlerin Çizimi
-  - [ ] Sprint 4.2: Manuel Düzenleme (Hücre Tıklamaları)
+- [x] **Faz 4: Takvim (Grid) Arayüzü**
+  - [x] Sprint 4.1: Büyük Çizelgenin ve Saatlerin Çizimi
+  - [x] Sprint 4.2: Manuel Düzenleme (Hücre Tıklamaları)
 - [ ] **Faz 5: Raporlama ve Cila**
   - [ ] Sprint 5.1: Excel (.xlsx) Çıktısının Alınması
   - [ ] Sprint 5.2: Mobil Panel Düzenlemeleri ve Hata Ayıklama

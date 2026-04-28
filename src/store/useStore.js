@@ -212,6 +212,32 @@ export const useStore = create(
         return { workspaces: updatedWorkspaces };
       }),
 
+      // Tekil hücreyi güncelle ve actualHours'u anlık yeniden hesapla
+      updateShiftCell: (workspaceId, empId, day, newShift) => set((state) => ({
+        workspaces: state.workspaces.map(ws => {
+          if (ws.id !== workspaceId) return ws;
+          const newShifts = {
+            ...ws.shifts,
+            [empId]: { ...(ws.shifts?.[empId] || {}), [day]: newShift },
+          };
+          const {
+            dayShiftHours = 8, nightShiftHours = 16,
+            aShiftHours = 8, bShiftHours = 5,
+            shiftLabels = { day: 'D', night: 'N', fixedDay: 'A', fixedHalfDay: 'B' },
+          } = ws.settings;
+          const { day: DAY, night: NIGHT, fixedDay: FIXED_DAY, fixedHalfDay: FIXED_HALF } = shiftLabels;
+          const emp = ws.employees.find(e => e.id === empId);
+          let total = emp?.initialBalance || 0;
+          for (const s of Object.values(newShifts[empId] || {})) {
+            if (s === DAY)        total += dayShiftHours;
+            else if (s === NIGHT)      total += nightShiftHours;
+            else if (s === FIXED_DAY)  total += aShiftHours;
+            else if (s === FIXED_HALF) total += bShiftHours;
+          }
+          return { ...ws, shifts: newShifts, actualHours: { ...(ws.actualHours || {}), [empId]: total } };
+        }),
+      })),
+
       // Hesaplanmış Vardiya (Takvim) Verisini Kaydetme
       setSchedule: (workspaceId, scheduleData, actualHoursData) => set((state) => {
         const updatedWorkspaces = state.workspaces.map(ws => {
