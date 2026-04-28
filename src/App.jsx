@@ -294,24 +294,25 @@ function App() {
           textAlign: 'center'
         }}>
           Designed &amp; Developed By{' '}
-      <a
-        href="https://www.linkedin.com/in/akaandonmez/"
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          color: 'rgba(255,255,255,0.4)',
-          textDecoration: 'underline',
-          pointerEvents: 'auto',
-          cursor: 'pointer',
-          transition: 'color 0.2s',
-        }}
-        onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}
-        onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
-      >
-        </a>{' '}
-        — 2026
+          <a
+            href="https://www.linkedin.com/in/akaandonmez/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: 'rgba(255,255,255,0.4)',
+              textDecoration: 'underline',
+              pointerEvents: 'auto',
+              cursor: 'pointer',
+              transition: 'color 0.2s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+          >
+            Kaan Donmez
+          </a>{' '}
+          — 2026
+        </div>
       </div>
-
     </div>
     </>
   );
