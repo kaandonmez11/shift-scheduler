@@ -3,11 +3,73 @@ import { persist } from 'zustand/middleware';
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
 
+const DEFAULT_RELIGIOUS_HOLIDAYS = [
+  { date: '2024-04-10', name: 'Ramazan Bayramı 1. Gün' },
+  { date: '2024-04-11', name: 'Ramazan Bayramı 2. Gün' },
+  { date: '2024-04-12', name: 'Ramazan Bayramı 3. Gün' },
+  { date: '2024-06-16', name: 'Kurban Bayramı 1. Gün' },
+  { date: '2024-06-17', name: 'Kurban Bayramı 2. Gün' },
+  { date: '2024-06-18', name: 'Kurban Bayramı 3. Gün' },
+  { date: '2024-06-19', name: 'Kurban Bayramı 4. Gün' },
+  { date: '2025-03-30', name: 'Ramazan Bayramı 1. Gün' },
+  { date: '2025-03-31', name: 'Ramazan Bayramı 2. Gün' },
+  { date: '2025-04-01', name: 'Ramazan Bayramı 3. Gün' },
+  { date: '2025-06-06', name: 'Kurban Bayramı 1. Gün' },
+  { date: '2025-06-07', name: 'Kurban Bayramı 2. Gün' },
+  { date: '2025-06-08', name: 'Kurban Bayramı 3. Gün' },
+  { date: '2025-06-09', name: 'Kurban Bayramı 4. Gün' },
+  { date: '2026-03-20', name: 'Ramazan Bayramı 1. Gün' },
+  { date: '2026-03-21', name: 'Ramazan Bayramı 2. Gün' },
+  { date: '2026-03-22', name: 'Ramazan Bayramı 3. Gün' },
+  { date: '2026-05-27', name: 'Kurban Bayramı 1. Gün' },
+  { date: '2026-05-28', name: 'Kurban Bayramı 2. Gün' },
+  { date: '2026-05-29', name: 'Kurban Bayramı 3. Gün' },
+  { date: '2026-05-30', name: 'Kurban Bayramı 4. Gün' },
+  { date: '2027-03-09', name: 'Ramazan Bayramı 1. Gün' },
+  { date: '2027-03-10', name: 'Ramazan Bayramı 2. Gün' },
+  { date: '2027-03-11', name: 'Ramazan Bayramı 3. Gün' },
+  { date: '2027-05-17', name: 'Kurban Bayramı 1. Gün' },
+  { date: '2027-05-18', name: 'Kurban Bayramı 2. Gün' },
+  { date: '2027-05-19', name: 'Kurban Bayramı 3. Gün' },
+  { date: '2027-05-20', name: 'Kurban Bayramı 4. Gün' },
+  { date: '2028-02-26', name: 'Ramazan Bayramı 1. Gün' },
+  { date: '2028-02-27', name: 'Ramazan Bayramı 2. Gün' },
+  { date: '2028-02-28', name: 'Ramazan Bayramı 3. Gün' },
+  { date: '2028-05-05', name: 'Kurban Bayramı 1. Gün' },
+  { date: '2028-05-06', name: 'Kurban Bayramı 2. Gün' },
+  { date: '2028-05-07', name: 'Kurban Bayramı 3. Gün' },
+  { date: '2028-05-08', name: 'Kurban Bayramı 4. Gün' },
+  { date: '2029-02-14', name: 'Ramazan Bayramı 1. Gün' },
+  { date: '2029-02-15', name: 'Ramazan Bayramı 2. Gün' },
+  { date: '2029-02-16', name: 'Ramazan Bayramı 3. Gün' },
+  { date: '2029-04-24', name: 'Kurban Bayramı 1. Gün' },
+  { date: '2029-04-25', name: 'Kurban Bayramı 2. Gün' },
+  { date: '2029-04-26', name: 'Kurban Bayramı 3. Gün' },
+  { date: '2029-04-27', name: 'Kurban Bayramı 4. Gün' },
+  { date: '2030-02-04', name: 'Ramazan Bayramı 1. Gün' },
+  { date: '2030-02-05', name: 'Ramazan Bayramı 2. Gün' },
+  { date: '2030-02-06', name: 'Ramazan Bayramı 3. Gün' },
+  { date: '2030-04-13', name: 'Kurban Bayramı 1. Gün' },
+  { date: '2030-04-14', name: 'Kurban Bayramı 2. Gün' },
+  { date: '2030-04-15', name: 'Kurban Bayramı 3. Gün' },
+  { date: '2030-04-16', name: 'Kurban Bayramı 4. Gün' },
+];
+
 export const useStore = create(
   persist(
     (set, get) => ({
       workspaces: [],
       activeWorkspaceId: null,
+
+      customHolidays: DEFAULT_RELIGIOUS_HOLIDAYS,
+
+      addCustomHoliday: (holiday) => set((state) => ({
+        customHolidays: [...state.customHolidays, holiday].sort((a, b) => a.date.localeCompare(b.date))
+      })),
+
+      removeCustomHoliday: (date) => set((state) => ({
+        customHolidays: state.customHolidays.filter(h => h.date !== date)
+      })),
 
       // --- EYLEMLER (ACTIONS) ---
 
@@ -19,11 +81,14 @@ export const useStore = create(
           settings: {
             year: new Date().getFullYear(),
             month: new Date().getMonth() + 1,
-            dayShiftHours: 8,      // Gündüz mesaisi saati
-            nightShiftHours: 12,   // Gece nöbeti saati
-            targetMonthlyHours: 180, // Aylık hedeflenen toplam saat
-            dailyDayTarget: 3,     // Günlük hedeflenen minimum/optimum Gündüzcü sayısı
-            dailyNightTarget: 2,   // Günlük hedeflenen minimum/optimum Gececi sayısı
+            dayShiftHours: 8,
+            nightShiftHours: 16,
+            targetMonthlyHours: 180,
+            dailyDayTarget: 3,
+            dailyNightTarget: 2,
+            aShiftHours: 8,
+            bShiftHours: 5,
+            shiftLabels: { day: 'D', night: 'N', fixedDay: 'A', fixedHalfDay: 'B' },
           },
           employees: [],
           shifts: []
@@ -80,8 +145,10 @@ export const useStore = create(
             const newEmployee = {
               id: generateId(),
               name: employeeData.name,
-              seniority: employeeData.seniority || 'yeni', // 'yeni', 'deneyimli', 'kidemli'
-              requestedOffDays: [] // o personele ait tercih edilen tatil günleri (ör: [3, 14, 25])
+              seniority: employeeData.seniority || 'yeni',
+              initialBalance: 0,
+              requestedOffDays: [],
+              requestedShifts: {},
             };
             return { ...ws, employees: [...ws.employees, newEmployee] };
           }
@@ -104,6 +171,20 @@ export const useStore = create(
         return { workspaces: updatedWorkspaces };
       }),
 
+      // Personel Bilgilerini (İsim, Kıdem vb.) Güncelleme
+      updateEmployeeData: (workspaceId, employeeId, newData) => set((state) => {
+        const updatedWorkspaces = state.workspaces.map(ws => {
+          if (ws.id === workspaceId) {
+            const updatedEmployees = ws.employees.map(emp => 
+              emp.id === employeeId ? { ...emp, ...newData } : emp
+            );
+            return { ...ws, employees: updatedEmployees };
+          }
+          return ws;
+        });
+        return { workspaces: updatedWorkspaces };
+      }),
+
       // Personel İzin (Off Days) Güncellemesi
       updateEmployeeOffDays: (workspaceId, employeeId, offDaysArray) => set((state) => {
         const updatedWorkspaces = state.workspaces.map(ws => {
@@ -112,6 +193,34 @@ export const useStore = create(
               emp.id === employeeId ? { ...emp, requestedOffDays: offDaysArray } : emp
             );
             return { ...ws, employees: updatedEmployees };
+          }
+          return ws;
+        });
+        return { workspaces: updatedWorkspaces };
+      }),
+
+      updateEmployeeRequestedShifts: (workspaceId, employeeId, shiftsObj) => set((state) => {
+        const updatedWorkspaces = state.workspaces.map(ws => {
+          if (ws.id === workspaceId) {
+            const updatedEmployees = ws.employees.map(emp =>
+              emp.id === employeeId ? { ...emp, requestedShifts: shiftsObj } : emp
+            );
+            return { ...ws, employees: updatedEmployees };
+          }
+          return ws;
+        });
+        return { workspaces: updatedWorkspaces };
+      }),
+
+      // Hesaplanmış Vardiya (Takvim) Verisini Kaydetme
+      setSchedule: (workspaceId, scheduleData, actualHoursData) => set((state) => {
+        const updatedWorkspaces = state.workspaces.map(ws => {
+          if (ws.id === workspaceId) {
+            return {
+              ...ws,
+              shifts: scheduleData,
+              actualHours: actualHoursData 
+            };
           }
           return ws;
         });
@@ -152,7 +261,14 @@ export const useStore = create(
       })
     }),
     {
-      name: 'shift-scheduler-storage', // LocalStorage anahtar ismi
+      name: 'shift-scheduler-storage',
+      version: 1,
+      migrate: (persisted, version) => {
+        if (version < 1 && (!persisted.customHolidays || persisted.customHolidays.length === 0)) {
+          persisted.customHolidays = DEFAULT_RELIGIOUS_HOLIDAYS;
+        }
+        return persisted;
+      },
     }
   )
 );

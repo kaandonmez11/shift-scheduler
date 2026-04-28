@@ -118,3 +118,29 @@ body::after {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-glass);
 }
+
+/* 
+  Modern Glass Scrollbar 
+  Tablo ve genel kaydırmalar için sisteme uygun şeffaf ve şık tasarım
+*/
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+  background-clip: content-box;
+}

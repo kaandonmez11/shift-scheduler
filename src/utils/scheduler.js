@@ -1,127 +1,184 @@
-/**
- * Aylık Vardiya Dağıtım Algoritması (Scheduler / Kural Motoru)
- * 
- * @param {number} year - Yıl (Örn: 2026)
- * @param {number} month - Ay (Örn: 5)
- * @param {Array} employees - Personel Listesi [{ id, name, seniority, requestedOffDays }]
- * @param {Object} settings - Ayarlar { dayShiftHours, nightShiftHours, targetMonthlyHours, dailyDayTarget, dailyNightTarget }
- * @returns {Object} Sonuç Matrisi { schedule: { empId: { day: 'S'|'N'|'İzin'|'-' } }, actualHours: { empId: hours } }
- */
-export const generateSchedule = (year, month, employees, settings) => {
-  // Varsayılan kotalar (Kullanıcı girmezse 3 Gündüz, 2 Gece)
-  const { 
-    dayShiftHours = 8, 
-    nightShiftHours = 12, 
+import { checkIsHoliday } from './holidays';
+
+export const generateSchedule = (year, month, employees, settings, startDay = 1, customHolidays = []) => {
+  const {
+    dayShiftHours = 8,
+    nightShiftHours = 16,
     dailyDayTarget = 3,
-    dailyNightTarget = 2
+    dailyNightTarget = 2,
+    aShiftHours = 8,
+    bShiftHours = 5,
+    shiftLabels = { day: 'D', night: 'N', fixedDay: 'A', fixedHalfDay: 'B' }
   } = settings;
+
+  const { day: DAY, night: NIGHT, fixedDay: FIXED_DAY, fixedHalfDay: FIXED_HALF } = shiftLabels;
 
   const numDays = new Date(year, month, 0).getDate();
   const schedule = {};
   const currentHours = {};
+  const shiftCounts = {};
 
-  // 1. Durum Başlangıcı (State Init)
   employees.forEach(emp => {
     schedule[emp.id] = {};
-    currentHours[emp.id] = 0;
+    currentHours[emp.id] = emp.initialBalance || 0;
+    shiftCounts[emp.id] = { day: 0, night: 0 };
     for (let d = 1; d <= numDays; d++) {
       schedule[emp.id][d] = '-';
     }
   });
 
-  // Ay içindeki her gün için sırayla dağıtım yapılır
-  for (let day = 1; day <= numDays; day++) {
-    
-    let availableForDay = [];
-    let availableForNight = [];
+  // Hamile ve Sorumlu için sabit program ön-ataması
+  employees.forEach(emp => {
+    if (emp.seniority !== 'hamile' && emp.seniority !== 'sorumlu') return;
 
-    // O gün için kimlerin uygun olduğunu filtrele
-    employees.forEach(emp => {
-      // KURAL 1: Kullanıcı bu günü izin (boş) gün olarak talep ettiyse
-      if (emp.requestedOffDays && emp.requestedOffDays.includes(day)) {
-        schedule[emp.id][day] = 'İzin';
-        return; // Gün döngüsünde bu personel için başka işleme gerek yok
+    for (let d = startDay; d <= numDays; d++) {
+      const reqShift = emp.requestedShifts?.[d];
+      if (reqShift === 'İzin' || emp.requestedOffDays?.includes(d)) {
+        schedule[emp.id][d] = 'İzin';
+        continue;
       }
 
-      // Geçmiş günler
+      if (checkIsHoliday(year, month, d, customHolidays)) {
+        schedule[emp.id][d] = '-';
+        continue;
+      }
+
+      const dayOfWeek = new Date(year, month - 1, d).getDay();
+
+      if (dayOfWeek === 0) {
+        schedule[emp.id][d] = '-';
+      } else if (dayOfWeek === 6) {
+        schedule[emp.id][d] = FIXED_HALF;
+        currentHours[emp.id] += bShiftHours;
+      } else {
+        schedule[emp.id][d] = FIXED_DAY;
+        currentHours[emp.id] += aShiftHours;
+      }
+    }
+  });
+
+  const shuffle = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  };
+
+  const mainEmployees = employees.filter(emp => emp.seniority !== 'hamile' && emp.seniority !== 'sorumlu');
+
+  for (let day = startDay; day <= numDays; day++) {
+
+    const hamileOnDuty = employees.filter(emp =>
+      emp.seniority === 'hamile' && schedule[emp.id][day] === FIXED_DAY
+    ).length;
+    const effectiveDayTarget = dailyDayTarget - hamileOnDuty;
+
+    let availableForDay = [];
+    let availableForNight = [];
+    let assignedDayCount = 0;
+    let assignedNightCount = 0;
+
+    mainEmployees.forEach(emp => {
+      const reqShift = emp.requestedShifts?.[day];
+
+      // İzin isteği (yeni yapı veya eski requestedOffDays)
+      if (reqShift === 'İzin' || emp.requestedOffDays?.includes(day)) {
+        schedule[emp.id][day] = 'İzin';
+        return;
+      }
+
+      // Sabit vardiya isteği — doğrudan ata, havuza ekleme
+      if (reqShift === DAY) {
+        schedule[emp.id][day] = DAY;
+        currentHours[emp.id] += dayShiftHours;
+        shiftCounts[emp.id].day++;
+        assignedDayCount++;
+        return;
+      }
+
+      if (reqShift === NIGHT) {
+        schedule[emp.id][day] = NIGHT;
+        currentHours[emp.id] += nightShiftHours;
+        shiftCounts[emp.id].night++;
+        assignedNightCount++;
+        return;
+      }
+
       const yestShift = day > 1 ? schedule[emp.id][day - 1] : '-';
       const prevYestShift = day > 2 ? schedule[emp.id][day - 2] : '-';
-      
+
       let canDay = true;
       let canNight = true;
 
-      // KURAL 2: Personel dün Gece Nöbeti (N) tuttuysa bugün kesinlikle Sabah (S) alamaz. (Dinlenme mecburiyeti)
-      if (yestShift === 'N') {
-        canDay = false;
-      }
+      if (yestShift === NIGHT) canDay = false;
+      if (emp.seniority === 'yeni') canNight = false;
+      if (yestShift === NIGHT && prevYestShift === NIGHT) canNight = false;
 
-      // KURAL (Kıdem): 'Yeni' olanlar asla Gece (N) Nöbetine kalamaz.
-      if (emp.seniority === 'yeni') {
-        canNight = false;
-      }
-
-      // KURAL 3 (Tıkanıklık İzni): Peş peşe nöbet istenmez. Ancak en az eleman bile yoksa MAX 2 gün üst üste tutabilir.
-      // Eger eleman dun ve onceki gun ust uste iki kez gece yazildiysa, bugün fiziki olarak kesinlikle N alamaz.
-      if (yestShift === 'N' && prevYestShift === 'N') {
-        canNight = false;
-      }
-
-      // Uygunluk havuzlarına kayıt
       if (canDay) availableForDay.push(emp);
       if (canNight) availableForNight.push(emp);
     });
 
-    // -------------------------------------------------------------
-    // Puanlama & Dengeleme (Sorting System)
-    // En az saate sahip olan kişi (saat açlığı çeken) vardiyayı kapar.
-    
-    // Gündüz sıralaması
-    availableForDay.sort((a, b) => currentHours[a.id] - currentHours[b.id]);
-    
-    // Gece sıralaması
-    availableForNight.sort((a, b) => {
-      // Dün gece nöbetçi olan bir personelin bugün de nöbet almaması için "Cezalandırma Puanı" ekliyoruz.
-      // Böylelikle sadece havuzda gerçekten "Başka kimse kalmamışsa" son çare olarak nöbet üstüne nöbet alır.
-      const penaltyA = (day > 1 && schedule[a.id][day - 1] === 'N') ? 1000 : 0;
-      const penaltyB = (day > 1 && schedule[b.id][day - 1] === 'N') ? 1000 : 0;
-      
-      const scoreA = currentHours[a.id] + penaltyA;
-      const scoreB = currentHours[b.id] + penaltyB;
-      
-      return scoreA - scoreB;
-    });
+    shuffle(availableForDay);
+    shuffle(availableForNight);
 
-    // -------------------------------------------------------------
-    // Vardiya Atamaları (Limitsiz Eleman Olsa Bile Hedef Kotaya Kadar Kısıtlanır)
-    
-    let assignedNightCount = 0;
-    let assignedDayCount = 0;
+    const getScore = (emp, type) => {
+      let score = currentHours[emp.id];
+      if (type === 'day') score += shiftCounts[emp.id].day * 5;
+      if (type === 'night') score += shiftCounts[emp.id].night * 8;
+      if (type === 'night' && day > 1 && schedule[emp.id][day - 1] === NIGHT) score += 500;
+      return score;
+    };
 
-    // ÖNCELİK GECEYE: Nöbet daha kritiktir ve kuralları daha sıkıdır.
-    for (let emp of availableForNight) {
-      if (assignedNightCount >= dailyNightTarget) break; 
-      
-      schedule[emp.id][day] = 'N';
-      currentHours[emp.id] += nightShiftHours;
-      assignedNightCount++;
+    availableForDay.sort((a, b) => getScore(a, 'day') - getScore(b, 'day'));
+    availableForNight.sort((a, b) => getScore(a, 'night') - getScore(b, 'night'));
+
+    let selectedDay = null;
+    let selectedNight = null;
+
+    for (let s of availableForDay) {
+      for (let n of availableForNight) {
+        if (s.id !== n.id) { selectedDay = s; selectedNight = n; break; }
+      }
+      if (selectedDay) break;
     }
 
-    // SONRA GÜNDÜZ: Kalan elemanlardan gündüz hedefini tamamla.
-    for (let emp of availableForDay) {
-      if (assignedDayCount >= dailyDayTarget) break;
-      
-      // Personel eğer yukarda geceye çekildiyse aynı anda sabaha da gelemez (Bir günde iki farklı nöbet yok)
-      if (schedule[emp.id][day] === 'N') continue;
+    if (!selectedDay && !selectedNight) {
+      if (availableForNight.length > 0) selectedNight = availableForNight[0];
+      else if (availableForDay.length > 0) selectedDay = availableForDay[0];
+    }
 
-      schedule[emp.id][day] = 'S';
-      currentHours[emp.id] += dayShiftHours;
+    if (selectedDay) {
+      schedule[selectedDay.id][day] = DAY;
+      currentHours[selectedDay.id] += dayShiftHours;
+      shiftCounts[selectedDay.id].day++;
       assignedDayCount++;
     }
 
-    // Not: "Eleman yetersiz olacak olursa minimum 1" kuralı şu anlama gelir;
-    // Puanlama, hedefe ulaşana kadar personelleri çeker. Zaten havuzda 1 kişi kalmışsa
-    // for döngüsü sadece o 1 kişiyi atar ve kotayı (%100 eleman yokluğu durumunda) elinden 
-    // geldiğince, kuralları ezip sistemi kırmadan gerçekleştirmiş olur.
+    if (selectedNight) {
+      schedule[selectedNight.id][day] = NIGHT;
+      currentHours[selectedNight.id] += nightShiftHours;
+      shiftCounts[selectedNight.id].night++;
+      assignedNightCount++;
+    }
+
+    for (let emp of availableForNight) {
+      if (assignedNightCount >= dailyNightTarget) break;
+      if (schedule[emp.id][day] !== '-') continue;
+      schedule[emp.id][day] = NIGHT;
+      currentHours[emp.id] += nightShiftHours;
+      shiftCounts[emp.id].night++;
+      assignedNightCount++;
+    }
+
+    for (let emp of availableForDay) {
+      if (assignedDayCount >= effectiveDayTarget) break;
+      if (schedule[emp.id][day] !== '-') continue;
+      schedule[emp.id][day] = DAY;
+      currentHours[emp.id] += dayShiftHours;
+      shiftCounts[emp.id].day++;
+      assignedDayCount++;
+    }
   }
 
   return { schedule, actualHours: currentHours };

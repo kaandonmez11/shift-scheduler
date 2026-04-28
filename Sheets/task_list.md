@@ -23,9 +23,9 @@ Proje, hızı ve modern yapısı nedeniyle **Vite (React)** kullanılarak geliş
 - [x] **Faz 2: Durum Yönetimi (State)**
   - [x] Sprint 2.1: Browser Kayıt Sistemi (Zustand Persist)
   - [x] Sprint 2.2: Sekme Yapısı ve JSON Export/Import
-- [ ] **Faz 3: Veriler ve Algoritma**
+- [x] **Faz 3: Veriler ve Algoritma**
   - [x] Sprint 3.1: Personel Listesi ve İzinlerin Eklenmesi
-  - [ ] Sprint 3.2: Otomatik Vardiya Algoritması (Kural Motoru)
+  - [x] Sprint 3.2: Otomatik Vardiya Algoritması (Kural Motoru)
 - [ ] **Faz 4: Takvim (Grid) Arayüzü**
   - [ ] Sprint 4.1: Büyük Çizelgenin ve Saatlerin Çizimi
   - [ ] Sprint 4.2: Manuel Düzenleme (Hücre Tıklamaları)

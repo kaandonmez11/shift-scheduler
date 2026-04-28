@@ -10,7 +10,7 @@
   padding: 1.5rem;
   transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .glass-card::before {
@@ -168,4 +168,20 @@ input[type="number"].glass-input::-webkit-outer-spin-button {
 
 input[type="number"].glass-input {
   -moz-appearance: textfield; /* Firefox desteği */
+}
+
+/* Native date picker dark tema */
+input[type="date"] {
+  color-scheme: dark;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: brightness(0) invert(1);
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity 0.2s;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
 }

@@ -13,8 +13,9 @@ const CustomSeniorityDropdown = ({ value, onChange }) => {
 
   const options = [
     { label: 'Yeni', value: 'yeni' },
-    { label: 'Deneyimli', value: 'deneyimli' },
-    { label: 'Kıdemli', value: 'kidemli' }
+    { label: 'Kıdemli', value: 'kidemli' },
+    { label: 'Hamile', value: 'hamile' },
+    { label: 'Sorumlu', value: 'sorumlu' },
   ];
   
   const current = options.find(o => o.value === value);
@@ -30,6 +31,17 @@ const CustomSeniorityDropdown = ({ value, onChange }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Seçili değere göre renk belirleme
+  const getColors = (val) => {
+    if (val === 'yeni') return { text: '#34d399', bg: 'rgba(52, 211, 153, 0.15)', border: 'rgba(52, 211, 153, 0.3)' };
+    if (val === 'kidemli') return { text: '#c084fc', bg: 'rgba(167, 139, 250, 0.15)', border: 'rgba(167, 139, 250, 0.3)' };
+    if (val === 'hamile') return { text: '#fb7185', bg: 'rgba(251, 113, 133, 0.15)', border: 'rgba(251, 113, 133, 0.3)' };
+    if (val === 'sorumlu') return { text: '#fb923c', bg: 'rgba(251, 146, 60, 0.15)', border: 'rgba(251, 146, 60, 0.3)' };
+    return { text: 'white', bg: 'rgba(0,0,0,0.2)', border: 'var(--glass-border)' };
+  };
+
+  const colors = getColors(value);
+
   return (
     <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '42px' }}>
       <button 
@@ -38,8 +50,9 @@ const CustomSeniorityDropdown = ({ value, onChange }) => {
         className="glass-input"
         style={{
           width: '100%', height: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '0 1rem', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--glass-border)',
-          borderRadius: 'var(--radius-md)', color: 'white', cursor: 'pointer', outline: 'none'
+          padding: '0 1rem', background: colors.bg, border: `1px solid ${colors.border}`,
+          borderRadius: 'var(--radius-md)', color: colors.text, cursor: 'pointer', outline: 'none',
+          fontWeight: '600'
         }}
       >
         <span>{current?.label}</span>
@@ -48,34 +61,45 @@ const CustomSeniorityDropdown = ({ value, onChange }) => {
           transition: 'transform 0.2s',
           marginLeft: '1rem',
           marginRight: '0.2rem',
-          color: 'var(--text-secondary)'
+          color: colors.text,
+          opacity: 0.8
         }} />
       </button>
 
       {open && (
         <div className="animate-fade-in" style={{
           position: 'absolute', top: 'calc(100% + 0.5rem)', left: 0, right: 0,
-          background: 'rgba(15, 23, 42, 0.95)', border: '1px solid var(--glass-border)',
-          borderRadius: 'var(--radius-md)', padding: '0.4rem', zIndex: 50,
-          backdropFilter: 'blur(12px)', display: 'flex', flexDirection: 'column', gap: '0.2rem',
-          boxShadow: 'var(--shadow-md)', animationDuration: '0.15s' // Dropdown hızlı açılsın
+          background: 'rgba(15, 23, 42, 0.98)', border: '1px solid var(--glass-border)',
+          borderRadius: 'var(--radius-md)', padding: '0.4rem', zIndex: 9999,
+          backdropFilter: 'blur(20px)', display: 'flex', flexDirection: 'column', gap: '0.2rem',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)', animationDuration: '0.1s',
+          overflow: 'visible'
         }}>
-          {options.map(opt => (
-            <div 
-              key={opt.value}
-              onClick={() => { onChange(opt.value); setOpen(false); }}
-              style={{
-                padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer',
-                background: value === opt.value ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
-                color: value === opt.value ? '#60a5fa' : 'var(--text-primary)',
-                transition: '0.2s', fontSize: '0.9rem'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = value === opt.value ? 'rgba(59, 130, 246, 0.2)' : 'transparent'}
-            >
-              {opt.label}
-            </div>
-          ))}
+          {options.map(opt => {
+            const optColors = getColors(opt.value);
+            return (
+              <div 
+                key={opt.value}
+                onClick={() => { onChange(opt.value); setOpen(false); }}
+                style={{
+                  padding: '0.6rem 1rem', borderRadius: '6px', cursor: 'pointer',
+                  background: value === opt.value ? optColors.bg : 'transparent',
+                  color: value === opt.value ? optColors.text : 'var(--text-primary)',
+                  transition: '0.2s', fontSize: '0.9rem', fontWeight: value === opt.value ? '600' : 'normal'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                  e.currentTarget.style.color = optColors.text;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = value === opt.value ? optColors.bg : 'transparent';
+                  e.currentTarget.style.color = value === opt.value ? optColors.text : 'var(--text-primary)';
+                }}
+              >
+                {opt.label}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -84,16 +108,37 @@ const CustomSeniorityDropdown = ({ value, onChange }) => {
 
 
 export default function PersonnelManager() {
-  const { workspaces, activeWorkspaceId, addEmployee, removeEmployee, updateEmployeeOffDays } = useStore();
+  const { workspaces, activeWorkspaceId, addEmployee, removeEmployee, updateEmployeeOffDays, updateEmployeeRequestedShifts, updateEmployeeBalance, updateEmployeeData, customHolidays = [] } = useStore();
   const activeWorkspace = workspaces.find(ws => ws.id === activeWorkspaceId);
   
   const [newName, setNewName] = useState('');
   const [newSeniority, setNewSeniority] = useState('yeni');
+  
+  // İsim düzenleme için local state
+  const [editingNameId, setEditingNameId] = useState(null);
+  const [tempName, setTempName] = useState('');
 
   if (!activeWorkspace) return null;
 
   const { employees, settings } = activeWorkspace;
-  const { year, month } = settings;
+  const { year, month, shiftLabels = { day: 'D', night: 'N' } } = settings;
+
+  const MONTH_NAMES = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+
+  // Gün tıklaması: boş → İzin → Gündüz → Gece → boş
+  const cycleShift = (empId, day, currentShifts) => {
+    const current = currentShifts?.[day];
+    const next = current === undefined ? 'İzin'
+      : current === 'İzin' ? shiftLabels.day
+      : current === shiftLabels.day ? shiftLabels.night
+      : undefined;
+
+    const updated = { ...(currentShifts || {}) };
+    if (next === undefined) delete updated[day];
+    else updated[day] = next;
+
+    updateEmployeeRequestedShifts(activeWorkspaceId, empId, updated);
+  };
 
   const handleAdd = () => {
     if (!newName.trim()) return;
@@ -144,7 +189,7 @@ export default function PersonnelManager() {
           />
         </div>
         <div style={{ flex: '1 1 150px', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Kıdem Seviyesi</label>
+          <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Personel Tipi</label>
           <CustomSeniorityDropdown value={newSeniority} onChange={setNewSeniority} />
         </div>
         <Button onClick={handleAdd} style={{ background: 'var(--accent-primary)', borderColor: 'transparent', color: '#fff', height: '42px', minWidth: '100px' }}>
@@ -170,15 +215,13 @@ export default function PersonnelManager() {
             }}>
 
               {/* Üst Kısım: Kıdem Bilgisi (Sol) ve Sil Butonu (Sağ) */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <span style={{ 
-                  fontSize: '0.75rem', padding: '0.25rem 0.75rem', borderRadius: '1rem', fontWeight: '500',
-                  background: emp.seniority === 'yeni' ? 'rgba(52, 211, 153, 0.2)' : emp.seniority === 'deneyimli' ? 'rgba(96, 165, 250, 0.2)' : 'rgba(167, 139, 250, 0.2)',
-                  color: emp.seniority === 'yeni' ? '#34d399' : emp.seniority === 'deneyimli' ? '#60a5fa' : '#c084fc',
-                  border: `1px solid ${emp.seniority === 'yeni' ? 'rgba(52, 211, 153, 0.3)' : emp.seniority === 'deneyimli' ? 'rgba(96, 165, 250, 0.3)' : 'rgba(167, 139, 250, 0.3)'}`
-                }}>
-                  {emp.seniority.charAt(0).toUpperCase() + emp.seniority.slice(1)}
-                </span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
+                <div style={{ width: '140px' }}>
+                  <CustomSeniorityDropdown 
+                    value={emp.seniority} 
+                    onChange={(val) => updateEmployeeData(activeWorkspaceId, emp.id, { seniority: val })} 
+                  />
+                </div>
                 
                 <button 
                   onClick={() => removeEmployee(activeWorkspaceId, emp.id)}
@@ -198,15 +241,70 @@ export default function PersonnelManager() {
               {/* Alt Kısım: İsim ve Takvim */}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', marginTop: '0.5rem' }}>
                 
-                {/* Personel İsmi */}
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: '150px' }}>
-                  <h3 style={{ fontSize: '1.25rem', margin: '0', fontWeight: 'bold', color: 'white' }}>{emp.name}</h3>
+                {/* Personel İsmi ve Bakiye Girişi */}
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '220px', gap: '0.75rem' }}>
+                  <div style={{ minHeight: '1.5rem', display: 'flex', alignItems: 'center' }}>
+                  {editingNameId === emp.id ? (
+                    <input 
+                      autoFocus
+                      className="glass-input"
+                      value={tempName}
+                      onChange={(e) => setTempName(e.target.value)}
+                      onBlur={() => {
+                        if (tempName.trim()) {
+                          updateEmployeeData(activeWorkspaceId, emp.id, { name: tempName.trim() });
+                        }
+                        setEditingNameId(null);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          if (tempName.trim()) {
+                            updateEmployeeData(activeWorkspaceId, emp.id, { name: tempName.trim() });
+                          }
+                          setEditingNameId(null);
+                        }
+                        if (e.key === 'Escape') setEditingNameId(null);
+                      }}
+                      style={{
+                        fontSize: '1.25rem', fontWeight: 'bold', border: 'none', 
+                        background: 'rgba(255,255,255,0.1)', color: 'white', padding: '0px 6px', borderRadius: '4px',
+                        outline: 'none', width: '100%', height: '1.5rem'
+                      }}
+                    />
+                  ) : (
+                    <h3 
+                      onClick={() => {
+                        setEditingNameId(emp.id);
+                        setTempName(emp.name);
+                      }}
+                      style={{ 
+                        fontSize: '1.25rem', margin: '0', fontWeight: 'bold', color: 'white', 
+                        cursor: 'text', borderBottom: '1px dashed transparent', transition: '0.2s',
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.borderBottom = '1px dashed rgba(255,255,255,0.4)'}
+                      onMouseLeave={(e) => e.currentTarget.style.borderBottom = '1px dashed transparent'}
+                    >
+                      {emp.name}
+                    </h3>
+                  )}
+                  </div>
+
+                  <div style={{ width: '120px' }}>
+                    <Input 
+                      id={`balance-${emp.id}`}
+                      label="Devreden Saat (±)"
+                      type="number"
+                      value={emp.initialBalance}
+                      onChange={(e) => updateEmployeeBalance(activeWorkspaceId, emp.id, Number(e.target.value))}
+                    />
+                  </div>
                 </div>
 
               {/* Day Picker (Takvim Seçici Grid Mimarisi) */}
               <div style={{ flex: 1, minWidth: '320px', borderLeft: '1px solid rgba(255,255,255,0.05)', paddingLeft: '1.5rem' }}>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem', display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                  <CalendarDays size={14} /> İstirahat / İzin Seçici ({year} / {month})
+                  <CalendarDays size={14} /> İstek Seçici — {MONTH_NAMES[month - 1]} {year}
                 </p>
                 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 36px)', gap: '0.3rem', width: 'max-content' }}>
@@ -225,39 +323,58 @@ export default function PersonnelManager() {
 
                   {/* Gerçek ay günleri (1 -> DayCount) */}
                   {daysArray.map(day => {
-                    const isOff = emp.requestedOffDays.includes(day);
-                    const holiday = checkIsHoliday(year, month, day);
-                    
+                    const reqShift = (emp.requestedShifts || {})[day];
+                    const holiday = checkIsHoliday(year, month, day, customHolidays);
+
+                    const isIzin  = reqShift === 'İzin';
+                    const isDay   = reqShift === shiftLabels.day;
+                    const isNight = reqShift === shiftLabels.night;
+
+                    let bg, color, border, shadow;
+                    if (isIzin) {
+                      bg = 'rgba(244,63,94,0.25)'; color = '#fb7185';
+                      border = 'rgba(244,63,94,0.6)'; shadow = '0 0 8px rgba(244,63,94,0.4)';
+                    } else if (isDay) {
+                      bg = 'rgba(16,185,129,0.2)'; color = '#34d399';
+                      border = 'rgba(16,185,129,0.6)'; shadow = '0 0 8px rgba(16,185,129,0.3)';
+                    } else if (isNight) {
+                      bg = 'rgba(59,130,246,0.2)'; color = '#60a5fa';
+                      border = 'rgba(59,130,246,0.6)'; shadow = '0 0 8px rgba(59,130,246,0.3)';
+                    } else if (holiday) {
+                      bg = 'rgba(251,191,36,0.15)'; color = '#fbbf24';
+                      border = 'rgba(251,191,36,0.6)'; shadow = 'inset 0 0 6px rgba(251,191,36,0.2)';
+                    } else {
+                      bg = 'rgba(255,255,255,0.04)'; color = 'var(--text-primary)';
+                      border = 'rgba(255,255,255,0.08)'; shadow = 'none';
+                    }
+
+                    const label = reqShift || (holiday ? '' : '');
+
                     return (
                       <button
                         key={day}
-                        onClick={() => toggleOffDay(emp.id, day, emp.requestedOffDays)}
-                        title={holiday ? `${holiday.name} (İzin için tıklayın)` : `${day}. Gün (İzin olarak işaretle)`}
+                        onClick={() => cycleShift(emp.id, day, emp.requestedShifts)}
+                        title={
+                          holiday ? `${holiday.name}` :
+                          isIzin ? 'İzin — tıkla: Gündüz' :
+                          isDay  ? `${shiftLabels.day} — tıkla: Gece` :
+                          isNight ? `${shiftLabels.night} — tıkla: Temizle` :
+                          'Tıkla: İzin'
+                        }
                         style={{
                           width: '36px', height: '36px', borderRadius: '6px',
-                          display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center',
-                          fontSize: '0.85rem', fontWeight: isOff ? 'bold' : 'normal',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: reqShift ? '0.7rem' : '0.85rem',
+                          fontWeight: reqShift ? 'bold' : 'normal',
                           cursor: 'pointer', transition: 'all 0.2s', padding: 0,
-                          
-                          // Özelleştirilmiş Takvim Stil Katmanı
-                          background: isOff ? 'rgba(244, 63, 94, 0.25)' : holiday ? 'rgba(251, 191, 36, 0.15)' : 'rgba(255,255,255,0.04)',
-                          color: isOff ? '#fb7185' : holiday ? '#fbbf24' : 'var(--text-primary)',
-                          border: `1px solid ${
-                            isOff ? 'rgba(244, 63, 94, 0.6)' : 
-                            holiday ? 'rgba(251, 191, 36, 0.6)' : 'rgba(255,255,255,0.08)'
-                          }`,
-                          boxShadow: isOff ? '0 0 8px rgba(244, 63, 94, 0.4)' : holiday ? 'inset 0 0 6px rgba(251, 191, 36, 0.2)' : 'none'
+                          background: bg, color, border: `1px solid ${border}`, boxShadow: shadow,
                         }}
-                        onMouseEnter={(e) => {
-                          if (!isOff) e.currentTarget.style.backgroundColor = holiday ? 'rgba(251, 191, 36, 0.25)' : 'rgba(255,255,255,0.1)';
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!isOff) e.currentTarget.style.backgroundColor = holiday ? 'rgba(251, 191, 36, 0.15)' : 'rgba(255,255,255,0.04)';
-                        }}
+                        onMouseEnter={(e) => { if (!reqShift) e.currentTarget.style.backgroundColor = holiday ? 'rgba(251,191,36,0.25)' : 'rgba(255,255,255,0.1)'; }}
+                        onMouseLeave={(e) => { if (!reqShift) e.currentTarget.style.backgroundColor = bg; }}
                       >
-                        {day}
+                        {reqShift || day}
                       </button>
-                    )
+                    );
                   })}
 
                 </div>

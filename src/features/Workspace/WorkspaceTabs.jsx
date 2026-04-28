@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { useStore } from '../../store/useStore';
-import { DownloadCloud, UploadCloud, Plus, Copy, Trash2, Edit2, Check } from 'lucide-react';
+import { DownloadCloud, UploadCloud, Plus, Copy, Trash2, Edit2, Check, Settings } from 'lucide-react';
 import Button from '../../components/Button';
+import HolidaySettings from '../Settings/HolidaySettings';
 
 export default function WorkspaceTabs() {
   const { 
@@ -16,7 +17,8 @@ export default function WorkspaceTabs() {
   } = useStore();
 
   const fileInputRef = useRef(null);
-  
+  const [showHolidaySettings, setShowHolidaySettings] = useState(false);
+
   // Yeniden adlandırma state'leri
   const [renamingId, setRenamingId] = useState(null);
   const [renameText, setRenameText] = useState("");
@@ -94,11 +96,26 @@ export default function WorkspaceTabs() {
 
   return (
     <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--glass-border)' }}>
+      {showHolidaySettings && <HolidaySettings onClose={() => setShowHolidaySettings(false)} />}
       {/* Üst Bar: İçe/Dışa Aktar Butonları */}
       <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', alignItems: 'center', padding: '0.5rem 0' }}>
         
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <input 
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <button
+            onClick={() => setShowHolidaySettings(true)}
+            title="Tatil Takvimi Ayarları"
+            style={{
+              background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)',
+              color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.4rem 0.6rem',
+              borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center',
+              transition: '0.2s', height: '36px'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(252,211,77,0.1)'; e.currentTarget.style.color = '#fcd34d'; e.currentTarget.style.borderColor = 'rgba(252,211,77,0.3)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.borderColor = 'var(--glass-border)'; }}
+          >
+            <Settings size={16} />
+          </button>
+          <input
             type="file" 
             accept=".shift,.json" 
             ref={fileInputRef} 
