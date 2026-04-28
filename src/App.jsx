@@ -116,9 +116,10 @@ function App() {
     <div style={{
       minHeight: '100vh',
       display: 'flex',
+      flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'center',
       padding: 'clamp(0.75rem, 4vw, 2rem)',
+      paddingBottom: '4rem'
     }}>
       <div style={{
         display: 'flex',
@@ -285,17 +286,14 @@ function App() {
         )}
 
 
-      </div>
-    </div>
-
-    {/* Footer */}
-    <div style={{
-      position: 'fixed', bottom: '1rem', right: '1rem',
-      fontSize: '0.72rem', color: 'rgba(255,255,255,0.28)',
-      pointerEvents: 'none', userSelect: 'none',
-      zIndex: 50,
-    }}>
-      Designed &amp; Developed By{' '}
+        {/* Footer */}
+        <div style={{
+          marginTop: '3rem',
+          fontSize: '0.72rem', color: 'rgba(255,255,255,0.28)',
+          pointerEvents: 'none', userSelect: 'none',
+          textAlign: 'center'
+        }}>
+          Designed &amp; Developed By{' '}
       <a
         href="https://www.linkedin.com/in/akaandonmez/"
         target="_blank"
@@ -310,9 +308,10 @@ function App() {
         onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}
         onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
       >
-        Kaan Donmez
-      </a>{' '}
-      — 2026
+        </a>{' '}
+        — 2026
+      </div>
+
     </div>
     </>
   );

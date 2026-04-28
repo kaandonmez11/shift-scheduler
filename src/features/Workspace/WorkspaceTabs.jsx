@@ -4,13 +4,14 @@ import { DownloadCloud, UploadCloud, Plus, Copy, Trash2, Edit2, Check, Settings 
 import HolidaySettings from '../Settings/HolidaySettings';
 
 // Yatay kaydırılabilir şerit içindeki tek aksiyon çipi
-const ActionChip = ({ icon, label, onClick, accent, success, disabled }) => (
+const ActionChip = ({ icon, label, title, onClick, accent, success, disabled }) => (
   <button
     onClick={onClick}
     disabled={disabled}
+    title={title || label}
     style={{
-      display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-      height: 44, padding: '0 1.1rem',
+      display: 'inline-flex', alignItems: 'center', gap: label ? '0.4rem' : '0',
+      height: 44, padding: label ? '0 1.1rem' : '0 1rem',
       border: `1px solid ${accent ? 'transparent' : success ? 'rgba(52,211,153,0.45)' : 'rgba(255,255,255,0.1)'}`,
       borderRadius: 999,
       background: accent
@@ -106,7 +107,7 @@ export default function WorkspaceTabs() {
       }}>
         <ActionChip
           icon={<Settings size={15} />}
-          label="Tatil Ayarları"
+          title="Tatil Ayarları"
           onClick={() => setShowHolidaySettings(true)}
         />
         <ActionChip
