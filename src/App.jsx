@@ -146,6 +146,12 @@ function App() {
         {/* Workspace (Senaryo) Sekmeleri ve Actions */}
         <WorkspaceTabs />
 
+        {/* Ana Vardiya Tablosu (Matrix) */}
+        {activeWorkspace && <CalendarGrid key={activeWorkspace.id + '_calendar'} />}
+
+        {/* Çoklu Personel ve İzin Paneli */}
+        {activeWorkspace && <PersonnelManager key={activeWorkspace.id + '_personnel'} />}
+
         {/* Aktif Workspace Ayarları */}
         {activeWorkspace && (
           <Card key={activeWorkspace.id} className="animate-fade-in">
@@ -278,11 +284,6 @@ function App() {
           </Card>
         )}
 
-        {/* Çoklu Personel ve İzin Paneli */}
-        {activeWorkspace && <PersonnelManager key={activeWorkspace.id + '_personnel'} />}
-
-        {/* Ana Vardiya Tablosu (Matrix) */}
-        {activeWorkspace && <CalendarGrid key={activeWorkspace.id + '_calendar'} />}
 
       </div>
     </div>
