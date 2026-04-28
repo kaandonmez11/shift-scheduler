@@ -138,7 +138,7 @@ function App() {
           fontWeight: '800',
           fontSize: 'clamp(1.25rem, 5vw, 2rem)',
         }}>
-          <img src="/logo.svg" alt="KD Logo" style={{ width: 'clamp(28px, 5vw, 36px)', height: 'clamp(28px, 5vw, 36px)' }} />
+          <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="KD Logo" style={{ width: 'clamp(28px, 5vw, 36px)', height: 'clamp(28px, 5vw, 36px)' }} />
           KD Vardiya Planlayıcı
         </h1>
 
