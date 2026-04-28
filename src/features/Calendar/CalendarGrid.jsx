@@ -167,7 +167,7 @@ export default function CalendarGrid() {
   ];
 
   return (
-    <Card className="animate-fade-in" style={{ marginTop: '2rem', padding: '1.5rem 1rem' }}>
+    <Card className="animate-fade-in" style={{ padding: '1.5rem 1rem' }}>
 
       {/* ── Başlık ── */}
       <div style={{ display:'flex', flexWrap:'wrap', justifyContent:'space-between', alignItems:'center', marginBottom:'1.5rem', gap:'1rem', borderBottom:'1px solid var(--glass-border)', paddingBottom:'1rem' }}>

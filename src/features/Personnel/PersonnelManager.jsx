@@ -169,10 +169,10 @@ export default function PersonnelManager() {
   };
 
   return (
-    <Card className="animate-fade-in" style={{ marginTop: '2rem' }}>
+    <Card className="animate-fade-in">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem' }}>
         <h2 style={{ fontSize: '1.25rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#60a5fa' }}>
-          <UserPlus size={24} /> Personel ve İzin Yönetimi
+          <UserPlus size={24} /> Personel ve İstek Yönetimi
         </h2>
       </div>
 
