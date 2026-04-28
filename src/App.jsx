@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Card from './components/Card';
 import Button from './components/Button';
 import Input from './components/Input';
-import { Database, Settings2, Trash2, ChevronDown } from 'lucide-react';
+import { Settings2, Trash2, ChevronDown } from 'lucide-react';
 import { useStore } from './store/useStore';
 import WorkspaceTabs from './features/Workspace/WorkspaceTabs';
 import PersonnelManager from './features/Personnel/PersonnelManager';
@@ -112,32 +112,34 @@ function App() {
   const activeWorkspace = workspaces.find(ws => ws.id === activeWorkspaceId);
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
+    <>
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
       justifyContent: 'center',
-      padding: '2rem'
+      padding: 'clamp(0.75rem, 4vw, 2rem)',
     }}>
       <div style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '2rem',
+        gap: '1.5rem',
         maxWidth: '800px',
-        width: '100%'
+        width: '100%',
       }}>
-      
-        <h1 style={{ 
-          textAlign: 'center', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          gap: '1rem', 
-          color: 'var(--text-primary)', 
-          fontWeight: '800', 
-          fontSize: '2rem' 
+
+        <h1 style={{
+          textAlign: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.75rem',
+          color: 'var(--text-primary)',
+          fontWeight: '800',
+          fontSize: 'clamp(1.25rem, 5vw, 2rem)',
         }}>
-          <Database size={36} color="var(--accent-primary)" /> Zustand & LocalStorage
+          <img src="/logo.svg" alt="KD Logo" style={{ width: 'clamp(28px, 5vw, 36px)', height: 'clamp(28px, 5vw, 36px)' }} />
+          KD Vardiya Planlayıcı
         </h1>
 
       
@@ -284,6 +286,34 @@ function App() {
 
       </div>
     </div>
+
+    {/* Footer */}
+    <div style={{
+      position: 'fixed', bottom: '1rem', right: '1rem',
+      fontSize: '0.72rem', color: 'rgba(255,255,255,0.28)',
+      pointerEvents: 'none', userSelect: 'none',
+      zIndex: 50,
+    }}>
+      Designed &amp; Developed By{' '}
+      <a
+        href="https://www.linkedin.com/in/akaandonmez/"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          color: 'rgba(255,255,255,0.4)',
+          textDecoration: 'underline',
+          pointerEvents: 'auto',
+          cursor: 'pointer',
+          transition: 'color 0.2s',
+        }}
+        onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}
+        onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+      >
+        Kaan Donmez
+      </a>{' '}
+      — 2026
+    </div>
+    </>
   );
 }
 

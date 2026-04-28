@@ -1,11 +1,14 @@
 import React, { useRef, useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
 import { useStore } from '../../store/useStore';
 import { generateSchedule } from '../../utils/scheduler';
 import { checkIsHoliday } from '../../utils/holidays';
-import { Settings, Play, Calendar as CalendarIcon } from 'lucide-react';
+import { Settings, Play, Calendar as CalendarIcon, Download } from 'lucide-react';
+import { exportToExcel } from '../../utils/exportExcel';
+import { exportToExcelStyled } from '../../utils/exportExcelStyled';
 
 const TR_DAYS = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
 
@@ -20,6 +23,7 @@ export default function CalendarGrid() {
   const scrollRef = useRef(null);
   const activeCellRef = useRef(null);
   const [popover, setPopover] = useState(null); // { empId, day, x, y }
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!popover) return;
@@ -64,7 +68,11 @@ export default function CalendarGrid() {
     e.stopPropagation();
     activeCellRef.current = e.currentTarget;
     const rect = e.currentTarget.getBoundingClientRect();
-    setPopover({ empId, day, x: rect.left + rect.width / 2, y: rect.bottom + 6 });
+    // Viewport kenarlarına taşmayı önle
+    const popoverW = 290;
+    const rawX = rect.left + rect.width / 2;
+    const clampedX = Math.max(popoverW / 2 + 8, Math.min(rawX, window.innerWidth - popoverW / 2 - 8));
+    setPopover({ empId, day, x: clampedX, y: rect.bottom + 6 });
   };
 
   const applyShift = (newShift) => {
@@ -121,7 +129,14 @@ export default function CalendarGrid() {
     backdropFilter: 'blur(12px)',
     borderRight: '1px solid rgba(255,255,255,0.08)',
   };
-  const stickyRight = {
+  const TOPLAM_W   = 96;
+  const DEVREDEN_W = 72;
+
+  // Masaüstünde sticky, mobilde normal (scroll ile birlikte kayar)
+  const stickyRight = isMobile ? {
+    textAlign: 'center',
+    borderLeft: '1px solid rgba(255,255,255,0.07)',
+  } : {
     position: 'sticky', right: 0, zIndex: 5,
     background: 'rgba(6,12,26,1)',
     backdropFilter: 'blur(40px) saturate(1.6)',
@@ -159,9 +174,21 @@ export default function CalendarGrid() {
         <h2 style={{ fontSize:'1.3rem', fontWeight:600, display:'flex', alignItems:'center', gap:'0.5rem', color:'#fcd34d', margin:0 }}>
           <CalendarIcon size={24}/> Vardiya Çizelgesi
         </h2>
-        <Button onClick={handleRunAlgorithm} style={{ background:'var(--accent-primary)', borderColor:'transparent', color:'white' }}>
-          <Play size={16} fill="white"/> Dağılımı Oluştur
-        </Button>
+        <div style={{ display:'flex', flexWrap:'wrap', gap:'0.5rem' }}>
+          {hasShifts && (
+            <>
+              <Button onClick={() => exportToExcelStyled(activeWorkspace, customHolidays)} style={{ borderColor:'rgba(251,191,36,0.5)', color:'#fbbf24', minHeight:44 }}>
+                <Download size={16}/> Detaylı Excel
+              </Button>
+              <Button onClick={() => exportToExcel(activeWorkspace, customHolidays)} style={{ borderColor:'rgba(52,211,153,0.4)', color:'#34d399', minHeight:44 }}>
+                <Download size={16}/> Excel İndir
+              </Button>
+            </>
+          )}
+          <Button onClick={handleRunAlgorithm} style={{ background:'var(--accent-primary)', borderColor:'transparent', color:'white', minHeight:44 }}>
+            <Play size={16} fill="white"/> Dağılımı Oluştur
+          </Button>
+        </div>
       </div>
 
       {/* ── Boş durumlar ── */}
@@ -194,7 +221,7 @@ export default function CalendarGrid() {
               maxHeight: '70vh',
             }}
           >
-            <table style={{ borderCollapse:'collapse', tableLayout:'fixed', minWidth: 150 + numDays * 40 + 80 + 96 }}>
+            <table style={{ borderCollapse:'collapse', tableLayout:'fixed', minWidth: 150 + numDays * 40 + TOPLAM_W + DEVREDEN_W }}>
 
               {/* ── THEAD ── */}
               <thead>
@@ -255,10 +282,10 @@ export default function CalendarGrid() {
                     );
                   })}
 
-                  <th style={{ ...thBase, ...stickyRight, zIndex:12, right:96, minWidth:72, padding:'10px 8px', fontSize:'0.72rem', color:'var(--text-muted)', fontWeight:500 }}>
+                  <th style={{ ...thBase, ...stickyRight, zIndex:12, right: isMobile ? 'auto' : TOPLAM_W, minWidth:DEVREDEN_W, padding:'10px 6px', fontSize:'0.72rem', color:'var(--text-muted)', fontWeight:500 }}>
                     Devreden
                   </th>
-                  <th style={{ ...thBase, ...stickyRight, zIndex:12, right:0, minWidth:96, padding:'10px 8px', fontSize:'0.72rem', color:'var(--text-muted)', fontWeight:500 }}>
+                  <th style={{ ...thBase, ...stickyRight, zIndex:12, right: isMobile ? 'auto' : 0, minWidth:TOPLAM_W, padding:'10px 6px', fontSize:'0.72rem', color:'var(--text-muted)', fontWeight:500 }}>
                     Toplam / Hedef
                   </th>
                 </tr>
@@ -327,7 +354,7 @@ export default function CalendarGrid() {
                       })}
 
                       {/* Devreden */}
-                      <td style={{ ...stickyRight, right:96, minWidth:72, height:44, fontSize:'0.82rem', fontWeight:800,
+                      <td style={{ ...stickyRight, right: isMobile ? 'auto' : TOPLAM_W, minWidth:DEVREDEN_W, height:44, fontSize:'0.82rem', fontWeight:800,
                         color:   balance >= 0 ? '#34d399' : '#f87171',
                         background: balance >= 0 ? 'rgba(52,211,153,0.08)' : 'rgba(248,113,113,0.08)',
                       }}>
@@ -335,7 +362,7 @@ export default function CalendarGrid() {
                       </td>
 
                       {/* Toplam / Hedef */}
-                      <td style={{ ...stickyRight, right:0, minWidth:96, height:44, fontSize:'0.8rem', fontWeight:700,
+                      <td style={{ ...stickyRight, right: isMobile ? 'auto' : 0, minWidth:TOPLAM_W, height:44, fontSize:'0.8rem', fontWeight:700,
                         color: onTarget ? '#34d399' : '#fbbf24',
                         background: onTarget ? 'rgba(52,211,153,0.07)' : 'rgba(251,191,36,0.07)',
                       }}>
@@ -398,12 +425,17 @@ export default function CalendarGrid() {
                   color: opt.color,
                   border: `1px solid ${opt.border ?? opt.color + '40'}`,
                   borderRadius: 7,
-                  padding: '7px 11px',
+                  padding: '0 10px',
                   fontSize: '0.82rem',
                   fontWeight: 700,
                   cursor: 'pointer',
                   transition: 'filter 0.15s',
-                  minWidth: 36,
+                  minWidth: 44,
+                  minHeight: 44,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  touchAction: 'manipulation',
                 }}
                 onMouseEnter={e => e.currentTarget.style.filter = 'brightness(1.25)'}
                 onMouseLeave={e => e.currentTarget.style.filter = 'brightness(1)'}

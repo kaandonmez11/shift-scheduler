@@ -8,9 +8,12 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-glass);
   padding: 1.5rem;
-  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+              box-shadow 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+              border-color 0.4s cubic-bezier(0.25, 1, 0.5, 1);
   position: relative;
   overflow: visible;
+  will-change: transform;
 }
 
 .glass-card::before {
@@ -51,8 +54,14 @@
   position: relative;
   overflow: hidden;
   box-shadow: var(--shadow-sm);
-  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+              background 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+              box-shadow 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+              border-color 0.4s cubic-bezier(0.25, 1, 0.5, 1);
   outline: none;
+  will-change: transform;
+  /* Minimum touch target */
+  min-height: 44px;
 }
 
 .glass-btn:disabled {
@@ -184,6 +193,15 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 input[type="date"]::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
+}
+
+/* Scrollbar'sız yatay kaydırma (action chip şeridi) */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }
 
 /* Takvim tablosu ince scrollbar */

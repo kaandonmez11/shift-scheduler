@@ -5,6 +5,7 @@ import Input from '../../components/Input';
 import { useStore } from '../../store/useStore';
 import { checkIsHoliday } from '../../utils/holidays';
 import { UserPlus, Trash2, CalendarDays, Plus, ChevronDown } from 'lucide-react';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 // Özel Kendi Dropdown (Select) Bileşenimiz
 const CustomSeniorityDropdown = ({ value, onChange }) => {
@@ -110,11 +111,11 @@ const CustomSeniorityDropdown = ({ value, onChange }) => {
 export default function PersonnelManager() {
   const { workspaces, activeWorkspaceId, addEmployee, removeEmployee, updateEmployeeOffDays, updateEmployeeRequestedShifts, updateEmployeeBalance, updateEmployeeData, customHolidays = [] } = useStore();
   const activeWorkspace = workspaces.find(ws => ws.id === activeWorkspaceId);
-  
+  const isMobile = useIsMobile();
+
   const [newName, setNewName] = useState('');
   const [newSeniority, setNewSeniority] = useState('yeni');
-  
-  // İsim düzenleme için local state
+
   const [editingNameId, setEditingNameId] = useState(null);
   const [tempName, setTempName] = useState('');
 
@@ -176,23 +177,21 @@ export default function PersonnelManager() {
       </div>
 
       {/* Personel Ekleme Formu */}
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', marginBottom: '2rem', flexWrap: 'wrap' }}>
-        <div style={{ flex: '1 1 200px' }}>
-          <Input 
+      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+        <div style={{ flex: '2 1 180px', minWidth: 0 }}>
+          <Input
             id="empName"
             label="Personel Adı Soyadı"
             value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleAdd();
-            }}
+            onChange={e => setNewName(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
           />
         </div>
-        <div style={{ flex: '1 1 150px', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <div style={{ flex: '1 1 130px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Personel Tipi</label>
           <CustomSeniorityDropdown value={newSeniority} onChange={setNewSeniority} />
         </div>
-        <Button onClick={handleAdd} style={{ background: 'var(--accent-primary)', borderColor: 'transparent', color: '#fff', height: '42px', minWidth: '100px' }}>
+        <Button onClick={handleAdd} style={{ background: 'var(--accent-primary)', borderColor: 'transparent', color: '#fff', minHeight: 44, minWidth: 80, flexShrink: 0 }}>
           <Plus size={16} /> Ekle
         </Button>
       </div>
@@ -239,10 +238,10 @@ export default function PersonnelManager() {
               </div>
 
               {/* Alt Kısım: İsim ve Takvim */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', marginTop: '0.5rem' }}>
-                
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '0.5rem', minWidth: 0 }}>
+
                 {/* Personel İsmi ve Bakiye Girişi */}
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '220px', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', flex: '0 0 auto', width: 190, gap: '0.75rem', minWidth: 0 }}>
                   <div style={{ minHeight: '1.5rem', display: 'flex', alignItems: 'center' }}>
                   {editingNameId === emp.id ? (
                     <input 
@@ -290,45 +289,51 @@ export default function PersonnelManager() {
                   )}
                   </div>
 
-                  <div style={{ width: '120px' }}>
-                    <Input 
+                  <div style={{ width: 120 }}>
+                    <Input
                       id={`balance-${emp.id}`}
                       label="Devreden Saat (±)"
                       type="number"
                       value={emp.initialBalance}
-                      onChange={(e) => updateEmployeeBalance(activeWorkspaceId, emp.id, Number(e.target.value))}
+                      onChange={e => updateEmployeeBalance(activeWorkspaceId, emp.id, Number(e.target.value))}
                     />
                   </div>
                 </div>
 
-              {/* Day Picker (Takvim Seçici Grid Mimarisi) */}
-              <div style={{ flex: 1, minWidth: '320px', borderLeft: '1px solid rgba(255,255,255,0.05)', paddingLeft: '1.5rem' }}>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem', display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+              {/* Day Picker — flex-basis ile doğal wrap, overflow yok */}
+              <div style={{
+                flex: '1 1 240px',
+                minWidth: 0,
+                overflow: 'hidden',
+                borderLeft: '1px solid rgba(255,255,255,0.05)',
+                paddingLeft: '1rem',
+              }}>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.75rem', display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
                   <CalendarDays size={14} /> İstek Seçici — {MONTH_NAMES[month - 1]} {year}
                 </p>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 36px)', gap: '0.3rem', width: 'max-content' }}>
-                  
-                  {/* Haftanın Günleri Başlığı */}
+
+                {/* repeat(7, minmax(0,1fr)) — her zaman 7 eşit sütun, container genişliğine uyar */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
+                  gap: '0.25rem',
+                }}>
                   {['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].map(d => (
-                    <div key={d} style={{ textAlign: 'center', fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.2rem', fontWeight: 'bold' }}>
+                    <div key={d} style={{ textAlign: 'center', fontSize: '0.62rem', color: 'var(--text-muted)', paddingBottom: '0.15rem', fontWeight: 'bold' }}>
                       {d}
                     </div>
                   ))}
-                  
-                  {/* Ay öncesi boşluk hücreleri (Padding offset) */}
+
                   {Array.from({ length: startDayOffset }).map((_, i) => (
-                    <div key={`empty-${i}`} style={{ width: '36px', height: '36px' }} />
+                    <div key={`empty-${i}`} style={{ aspectRatio: '1' }} />
                   ))}
 
-                  {/* Gerçek ay günleri (1 -> DayCount) */}
                   {daysArray.map(day => {
                     const reqShift = (emp.requestedShifts || {})[day];
-                    const holiday = checkIsHoliday(year, month, day, customHolidays);
-
-                    const isIzin  = reqShift === 'İzin';
-                    const isDay   = reqShift === shiftLabels.day;
-                    const isNight = reqShift === shiftLabels.night;
+                    const holiday  = checkIsHoliday(year, month, day, customHolidays);
+                    const isIzin   = reqShift === 'İzin';
+                    const isDay    = reqShift === shiftLabels.day;
+                    const isNight  = reqShift === shiftLabels.night;
 
                     let bg, color, border, shadow;
                     if (isIzin) {
@@ -348,29 +353,25 @@ export default function PersonnelManager() {
                       border = 'rgba(255,255,255,0.08)'; shadow = 'none';
                     }
 
-                    const label = reqShift || (holiday ? '' : '');
-
                     return (
                       <button
                         key={day}
                         onClick={() => cycleShift(emp.id, day, emp.requestedShifts)}
-                        title={
-                          holiday ? `${holiday.name}` :
-                          isIzin ? 'İzin — tıkla: Gündüz' :
-                          isDay  ? `${shiftLabels.day} — tıkla: Gece` :
-                          isNight ? `${shiftLabels.night} — tıkla: Temizle` :
-                          'Tıkla: İzin'
-                        }
+                        title={holiday ? holiday.name : undefined}
                         style={{
-                          width: '36px', height: '36px', borderRadius: '6px',
+                          aspectRatio: '1',
+                          width: '100%',
+                          borderRadius: '6px',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: reqShift ? '0.7rem' : '0.85rem',
+                          fontSize: '0.72rem',
                           fontWeight: reqShift ? 'bold' : 'normal',
-                          cursor: 'pointer', transition: 'all 0.2s', padding: 0,
+                          cursor: 'pointer', transition: 'background 0.15s', padding: 0,
                           background: bg, color, border: `1px solid ${border}`, boxShadow: shadow,
+                          touchAction: 'manipulation',
+                          minHeight: 32,
                         }}
-                        onMouseEnter={(e) => { if (!reqShift) e.currentTarget.style.backgroundColor = holiday ? 'rgba(251,191,36,0.25)' : 'rgba(255,255,255,0.1)'; }}
-                        onMouseLeave={(e) => { if (!reqShift) e.currentTarget.style.backgroundColor = bg; }}
+                        onMouseEnter={e => { if (!reqShift) e.currentTarget.style.backgroundColor = holiday ? 'rgba(251,191,36,0.25)' : 'rgba(255,255,255,0.1)'; }}
+                        onMouseLeave={e => { if (!reqShift) e.currentTarget.style.backgroundColor = bg; }}
                       >
                         {reqShift || day}
                       </button>

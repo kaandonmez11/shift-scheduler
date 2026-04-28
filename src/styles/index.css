@@ -5,9 +5,9 @@
   
   /* Background & Mesh Colors (Daha Belirgin Tones) */
   --bg-base: #0a0f18; /* Very dark blue/slate */
-  --mesh-1: rgba(37, 99, 235, 0.55); /* Daha parlak/vurgulu Mavi */
-  --mesh-2: rgba(147, 51, 234, 0.50); /* Daha parlak/vurgulu Mor */
-  --mesh-3: rgba(20, 184, 166, 0.45); /* Daha parlak/vurgulu Turkuaz */
+  --mesh-1: rgba(97, 119, 169, 0.75); /* Daha parlak/vurgulu Mavi */
+  --mesh-2: rgba(237, 107, 105, 0.75); /* Daha parlak/vurgulu Mor */
+  --mesh-3: rgba(71, 184, 173, 0.75); /* Daha parlak/vurgulu Turkuaz */
 
   /* Panel & Glass Colors */
   --glass-bg: rgba(17, 24, 39, 0.65);
@@ -71,18 +71,20 @@ body::after {
 }
 
 body::before {
-  background: 
+  background:
     radial-gradient(circle at 15% 50%, var(--mesh-1), transparent 65%),
     radial-gradient(circle at 85% 30%, var(--mesh-2), transparent 65%);
   animation: liquidMesh1 12s ease-in-out infinite alternate;
   filter: blur(80px);
+  will-change: transform;
 }
 
 body::after {
-  background: 
+  background:
     radial-gradient(circle at 50% 80%, var(--mesh-3), transparent 70%);
   animation: liquidMesh2 15s ease-in-out infinite alternate-reverse;
   filter: blur(80px);
+  will-change: transform;
 }
 
 @keyframes liquidMesh1 {
@@ -143,4 +145,31 @@ body::after {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
   background-clip: content-box;
+}
+
+/* ── Reduced Motion ───────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after {
+    animation: none;
+  }
+  .animate-fade-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Responsive Layout ────────────────────────────────────────────────────── */
+:root {
+  --page-padding: clamp(0.75rem, 4vw, 2rem);
+}
+
+/* Minimum touch target (Apple HIG & Google Material: 44×44px) */
+.touch-btn {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }

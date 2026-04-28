@@ -29,6 +29,6 @@ Proje, hızı ve modern yapısı nedeniyle **Vite (React)** kullanılarak geliş
 - [x] **Faz 4: Takvim (Grid) Arayüzü**
   - [x] Sprint 4.1: Büyük Çizelgenin ve Saatlerin Çizimi
   - [x] Sprint 4.2: Manuel Düzenleme (Hücre Tıklamaları)
-- [ ] **Faz 5: Raporlama ve Cila**
-  - [ ] Sprint 5.1: Excel (.xlsx) Çıktısının Alınması
-  - [ ] Sprint 5.2: Mobil Panel Düzenlemeleri ve Hata Ayıklama
+- [x] **Faz 5: Raporlama ve Cila**
+  - [x] Sprint 5.1: Excel (.xlsx) Çıktısının Alınması
+  - [x] Sprint 5.2: Mobil Panel Düzenlemeleri ve Hata Ayıklama
