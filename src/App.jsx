@@ -40,16 +40,15 @@ const CustomMonthDropdown = ({ year, value, onChange }) => {
   }, []);
 
   return (
-    <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '42px' }}>
-      <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', display: 'block' }}>Senaryo Ayı</label>
-      <button 
+    <div ref={containerRef} className="glass-input-wrapper" style={{ position: 'relative' }}>
+      <label className="glass-input-label">Senaryo Ayı</label>
+      <button
         type="button"
         onClick={(e) => { e.preventDefault(); setOpen(!open); }}
         className="glass-input"
         style={{
-          width: '100%', height: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '0 1rem', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--glass-border)',
-          borderRadius: 'var(--radius-md)', color: 'white', cursor: 'pointer', outline: 'none'
+          width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          cursor: 'pointer', outline: 'none', textAlign: 'left',
         }}
       >
         <span>{current?.label || 'Seçiniz'}</span>
@@ -125,7 +124,7 @@ function App() {
         display: 'flex',
         flexDirection: 'column',
         gap: '1.5rem',
-        maxWidth: '800px',
+        maxWidth: '1200px',
         width: '100%',
       }}>
 
@@ -188,50 +187,64 @@ function App() {
                 value={activeWorkspace.settings.year}
                 onChange={(e) => updateActiveWorkspaceSettings({ year: Number(e.target.value) })}
               />
-              <div style={{ position: 'relative' }}>
-                <CustomMonthDropdown 
-                  year={activeWorkspace.settings.year}
-                  value={activeWorkspace.settings.month}
-                  onChange={(val) => updateActiveWorkspaceSettings({ month: val })}
-                />
-              </div>
-              <Input 
-                id="dayShift" 
-                label="Gündüz Mesaisi Süresi (Saat)" 
-                type="number"
-                value={activeWorkspace.settings.dayShiftHours}
-                onChange={(e) => updateActiveWorkspaceSettings({ dayShiftHours: Number(e.target.value) })}
+              <CustomMonthDropdown
+                year={activeWorkspace.settings.year}
+                value={activeWorkspace.settings.month}
+                onChange={(val) => updateActiveWorkspaceSettings({ month: val })}
               />
-              <Input 
-                id="nightShift" 
-                label="Gece Nöbeti Süresi (Saat)" 
+              <Input
+                id="dayShift"
+                label="Gündüz Mesai Saati"
                 type="number"
-                value={activeWorkspace.settings.nightShiftHours}
-                onChange={(e) => updateActiveWorkspaceSettings({ nightShiftHours: Number(e.target.value) })}
+                value={activeWorkspace.settings.dayShiftHours || ''}
+                onChange={(e) => updateActiveWorkspaceSettings({ dayShiftHours: e.target.value === '' ? 0 : Number(e.target.value) })}
+                onBlur={(e) => { if (e.target.value === '') updateActiveWorkspaceSettings({ dayShiftHours: 0 }); }}
+              />
+              <Input
+                id="nightShift"
+                label="Nöbet Mesai Saati"
+                type="number"
+                value={activeWorkspace.settings.nightShiftHours || ''}
+                onChange={(e) => updateActiveWorkspaceSettings({ nightShiftHours: e.target.value === '' ? 0 : Number(e.target.value) })}
+                onBlur={(e) => { if (e.target.value === '') updateActiveWorkspaceSettings({ nightShiftHours: 0 }); }}
               />
 
-              <Input 
-                id="dailyDayTarget" 
-                label="Gündüzcü Kadrosu (Kişi/Günde)" 
+              <Input
+                id="dailyDayTarget"
+                label="Gündüz Kişi Sayısı"
                 type="number"
-                value={activeWorkspace.settings.dailyDayTarget}
-                onChange={(e) => updateActiveWorkspaceSettings({ dailyDayTarget: Number(e.target.value) })}
+                value={activeWorkspace.settings.dailyDayTarget || ''}
+                onChange={(e) => updateActiveWorkspaceSettings({ dailyDayTarget: e.target.value === '' ? 0 : Number(e.target.value) })}
+                onBlur={(e) => { if (e.target.value === '') updateActiveWorkspaceSettings({ dailyDayTarget: 0 }); }}
               />
-              <Input 
-                id="dailyNightTarget" 
-                label="Gece Nöbetçi Kadrosu (Kişi/Günde)" 
+              <Input
+                id="dailyNightTarget"
+                label="Nöbet Kişi Sayısı"
                 type="number"
-                value={activeWorkspace.settings.dailyNightTarget}
-                onChange={(e) => updateActiveWorkspaceSettings({ dailyNightTarget: Number(e.target.value) })}
+                value={activeWorkspace.settings.dailyNightTarget || ''}
+                onChange={(e) => updateActiveWorkspaceSettings({ dailyNightTarget: e.target.value === '' ? 0 : Number(e.target.value) })}
+                onBlur={(e) => { if (e.target.value === '') updateActiveWorkspaceSettings({ dailyNightTarget: 0 }); }}
+              />
+
+              <Input
+                id="maxConsecutiveWorkDays"
+                label="Maks. Ardışık Çalışma Günü"
+                type="number"
+                min={1}
+                max={31}
+                value={(activeWorkspace.settings.maxConsecutiveWorkDays ?? 6) || ''}
+                onChange={(e) => updateActiveWorkspaceSettings({ maxConsecutiveWorkDays: e.target.value === '' ? 0 : Number(e.target.value) })}
+                onBlur={(e) => { if (e.target.value === '') updateActiveWorkspaceSettings({ maxConsecutiveWorkDays: 6 }); }}
               />
 
               <div style={{ gridColumn: '1 / -1' }}>
                 <Input
                   id="targetHours"
-                  label="Personel Aylık Hedef Mesai (Saat)"
+                  label="Personel Aylık Hedef Mesai Saati"
                   type="number"
-                  value={activeWorkspace.settings.targetMonthlyHours}
-                  onChange={(e) => updateActiveWorkspaceSettings({ targetMonthlyHours: Number(e.target.value) })}
+                  value={activeWorkspace.settings.targetMonthlyHours || ''}
+                  onChange={(e) => updateActiveWorkspaceSettings({ targetMonthlyHours: e.target.value === '' ? 0 : Number(e.target.value) })}
+                  onBlur={(e) => { if (e.target.value === '') updateActiveWorkspaceSettings({ targetMonthlyHours: 0 }); }}
                 />
               </div>
 

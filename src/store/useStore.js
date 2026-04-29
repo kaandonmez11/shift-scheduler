@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { calculateSorumluMonthlyTarget } from '../utils/holidays';
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
 
@@ -86,6 +87,7 @@ export const useStore = create(
             targetMonthlyHours: 180,
             dailyDayTarget: 3,
             dailyNightTarget: 2,
+            maxConsecutiveWorkDays: 6,
             aShiftHours: 8,
             bShiftHours: 5,
             shiftLabels: { day: 'D', night: 'N', fixedDay: 'A', fixedHalfDay: 'B' },
@@ -122,15 +124,31 @@ export const useStore = create(
       // Aktif workspace'in ayarlarını/verilerini güncelle
       updateActiveWorkspaceSettings: (newSettings) => set((state) => {
         if (!state.activeWorkspaceId) return state;
-        
+
+        const monthOrYearChanged = 'month' in newSettings || 'year' in newSettings;
+
         const updatedWorkspaces = state.workspaces.map(ws => {
-          if (ws.id === state.activeWorkspaceId) {
-            return {
-              ...ws,
-              settings: { ...ws.settings, ...newSettings }
-            };
+          if (ws.id !== state.activeWorkspaceId) return ws;
+
+          const updatedSettings = { ...ws.settings, ...newSettings };
+
+          // Ay/yıl değişince sorumlu takvimine göre hedef mesayi otomatik hesapla
+          if (monthOrYearChanged) {
+            updatedSettings.targetMonthlyHours = calculateSorumluMonthlyTarget(
+              updatedSettings.year,
+              updatedSettings.month,
+              state.customHolidays,
+              updatedSettings.aShiftHours ?? 8,
+              updatedSettings.bShiftHours ?? 5
+            );
           }
-          return ws;
+
+          // Ay/yıl değişince istek seçici sıfırla
+          const updatedEmployees = monthOrYearChanged
+            ? ws.employees.map(emp => ({ ...emp, requestedShifts: {}, requestedOffDays: [] }))
+            : ws.employees;
+
+          return { ...ws, settings: updatedSettings, employees: updatedEmployees };
         });
 
         return { workspaces: updatedWorkspaces };
